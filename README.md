@@ -12,3 +12,8 @@ The agent's goal is to reach the highest possible speed in accurately guessing t
 cd gym-numgrid
 pip install -e .
 ```
+
+To get started with the environment, you can run the default test example:
+```bash
+python test.py
+```
