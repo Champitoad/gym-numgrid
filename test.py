@@ -9,9 +9,7 @@ for i_episode in range(20):
     for t in range(100):
         env.render()
         pos = env.cursor_move(env.direction_space.sample(), distance=1)
-        # pos = env.cursor_move((1,0), 1)
-        # digit = env.digit_space.sample()
-        digit = 1
+        digit = env.digit_space.sample()
         action = (tuple(pos), digit)
         print('action:', action)
         observation, reward, done, info = env.step(action)
