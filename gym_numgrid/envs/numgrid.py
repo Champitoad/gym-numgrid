@@ -25,24 +25,23 @@ class NumGrid(gym.Env):
         self.viewer = None
 
     def _step(self, action):
-        pos, digit = action
+        digit, pos = action
         reward = 0
         done = False
-        info = {'cursor': self.cursor, 'out_of_bounds': False, 'digit': None}
+        info = {'out_of_bounds': False, 'digit': self.current_digit}
+
+        if digit < 10:
+            if digit != info['digit']:
+                reward -= 3
+            else:
+                reward += 3
+                # done = True
 
         if not self.position_space.contains(pos):
             info['out_of_bounds'] = True
         else:
             self.cursor_pos = np.array(pos)
             info['cursor'] = self.cursor
-
-        if digit < 10:
-            if digit != self.current_digit:
-                reward -= 3
-            else:
-                reward += 3
-                # done = True
-            info['digit'] = self.current_digit
 
         return self.cursor_pos, reward, done, info
 
@@ -136,21 +135,27 @@ class NumGrid(gym.Env):
         H, W, h, w = self.images.shape
         self.world = self.images.swapaxes(1,2).reshape(H*h, W*w)
 
-        # An action consists of a new cursor position, plus a guess at
-        # the digit currently under the cursor; the agent might not want
-        # to try a guess yet, in which case it should use the value 10
-        # to indicate that the prediction must be ignored
+        # An action consists of a guess at the digit currently under the cursor,
+        # plus a new cursor position; the agent might not want to try a guess yet,
+        # in which case it should use the value 10 to indicate that the prediction
+        # must be ignored
+
+        self.digit_space = spaces.Discrete(11)
+
         world_bounds = np.array(self.world.shape[::-1]) - 1 - self.cursor_size
         self.position_space = spaces.MultiDiscrete(np.stack([(0,0), world_bounds], 1))
-        self.digit_space = spaces.Discrete(11)
-        self.action_space = spaces.Tuple((self.position_space, self.digit_space))
+
+        self.action_space = spaces.Tuple((self.digit_space, self.position_space))
+
         # A smaller action space for the position consisting of the 4 orthogonal directions;
         # one such action must be converted into a real action (a position),
         # typically using the cursor_move method
+
         self.direction_space = Direction()
 
         # An observation is the cursor view on the world, therefore the observation
         # space is equivalent to the cursor position space (cursor size being fixed)
+
         self.observation_space = self.position_space
 
     def _seed(self, seed=None):

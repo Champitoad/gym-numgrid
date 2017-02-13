@@ -8,9 +8,9 @@ for i_episode in range(20):
     observation = env.reset()
     for t in range(100):
         env.render()
-        pos = env.cursor_move(env.direction_space.sample(), distance=1)
         digit = env.digit_space.sample()
-        action = (tuple(pos), digit)
+        pos = env.cursor_move(env.direction_space.sample(), distance=1)
+        action = (digit, tuple(pos))
         print('action:', action)
         observation, reward, done, info = env.step(action)
         if info['out_of_bounds']:
