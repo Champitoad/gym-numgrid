@@ -1,12 +1,13 @@
 from time import sleep
-from gym_numgrid.envs import NumGrid
+import gym
+import gym_numgrid
 
 red = '\033[91m'
 yellow = '\033[93m'
 green = '\033[32m'
 endc = '\033[0m'
 
-env = NumGrid()
+env = gym.make('NumGrid-v0')
 env.configure(size=(5,5), render_scale=4, draw_grid=True)
 for i_episode in range(20):
     print("\n********* EPISODE", i_episode, "**********\n")
