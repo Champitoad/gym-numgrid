@@ -1,0 +1,1 @@
+from gym_numgrid.wrappers.direction_wrapper import DirectionWrapper
