@@ -17,5 +17,5 @@ pip install -e .
 
 To get started with the environment, you can run it with one of the agents in `examples/agents`:
 ```bash
-python examples/agents/random.py
+python examples/agents/random_agent.py
 ```
