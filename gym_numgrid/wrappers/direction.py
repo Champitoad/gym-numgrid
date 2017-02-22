@@ -1,25 +1,31 @@
 import logging
 logger = logging.getLogger(__name__)
-
 import numpy as np
 
-from gym import ActionWrapper
+import gym
 
-from gym_numgrid.spaces import Direction
-
-class DirectionWrapper(ActionWrapper):
+class Direction(gym.ActionWrapper):
     """
     An action wrapper for NumGrid converting directions into positions.
+
+    Removes position space information at wrapper level, hence should be used after
+    any wrapper using it in the wrapper stack; these include:
+        - gym_numgrid.wrappers.DiscretePosition
     """
     def __init__(self, env, distance=1):
         super().__init__(env)
-        self.direction_space = Direction()
         self.distance = distance
+
+        self.digit_space = self.env.digit_space
+
+        self.direction_space = gym_numgrid.spaces.Direction()
+
+        self.action_space = gym.spaces.Tuple(self.digit_space, self.direction_space)
 
     def _action(self, action):
         digit, direction = action
-        position = self.cursor_move(direction, self.distance)
-        return (digit, position)
+        pos = self.cursor_move(direction, self.distance)
+        return (digit, pos)
 
     def cursor_move(self, direction, distance):
         """

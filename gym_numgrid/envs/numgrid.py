@@ -25,7 +25,7 @@ class NumGrid(gym.Env):
         spaces.prng.np_random.seed()
         
         self.steps = 0 # Number of steps done in this episode
-        self.nb_steps = 100 # Number of steps to achieve in an episode
+        self.num_steps = 100 # Number of steps to achieve in an episode
 
         self.viewer = None
 
@@ -49,7 +49,7 @@ class NumGrid(gym.Env):
         info['cursor'] = self.cursor
 
         self.steps += 1
-        if self.steps >= self.nb_steps:
+        if self.steps >= self.num_steps:
             done = True
 
         return self.cursor_pos, reward, done, info
