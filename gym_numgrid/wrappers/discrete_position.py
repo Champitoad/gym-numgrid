@@ -14,7 +14,7 @@ class DiscretePosition(gym.ActionWrapper):
         pos_mapping = total_discrete_mapping(self.position_space)
         self.position_space = gym.spaces.DiscreteToMultiDiscrete(self.position_space, pos_mapping)
 
-        self.action_space = gym.spaces.Tuple(self.digit_space, self.position_space)
+        self.action_space = gym.spaces.Tuple((self.digit_space, self.position_space))
 
     def _action(self, action):
         digit, pos = action

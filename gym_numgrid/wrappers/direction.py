@@ -3,6 +3,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 import gym
+from gym_numgrid import spaces
 
 class Direction(gym.ActionWrapper):
     """
@@ -18,9 +19,9 @@ class Direction(gym.ActionWrapper):
 
         self.digit_space = self.env.digit_space
 
-        self.direction_space = gym_numgrid.spaces.Direction()
+        self.direction_space = spaces.Direction()
 
-        self.action_space = gym.spaces.Tuple(self.digit_space, self.direction_space)
+        self.action_space = gym.spaces.Tuple((self.digit_space, self.direction_space))
 
     def _action(self, action):
         digit, direction = action

@@ -2,14 +2,17 @@ import gym
 from gym.wrappers import Monitor
 from gym.scoreboard.scoring import score_from_local
 
-from gym_numgrid.wrappers import DirectionWrapper
+from gym_numgrid.wrappers import Direction
 
 red = '\033[91m'
 yellow = '\033[93m'
 green = '\033[32m'
 endc = '\033[0m'
 
-numgrid = DirectionWrapper(gym.make('NumGrid-v0'))
+numgrid = gym.make('NumGrid-v0')
+numgrid.configure(size=(5,5), render_scale=4, draw_grid=True)
+numgrid = Direction(numgrid)
+
 experiment_path = '/tmp/numgrid-direction-random'
 env = Monitor(numgrid, experiment_path, force=True)
 env.configure(size=(5,5), render_scale=4, draw_grid=True)

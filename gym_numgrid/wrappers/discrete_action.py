@@ -2,7 +2,7 @@ import gym
 
 from gym_numgrid.utils.spaces import total_discrete_mapping
 
-class DiscreteAction(gym.ActionWrapper)
+class DiscreteAction(gym.ActionWrapper):
     """
     An action wrapper for NumGrid with a Discrete action space,
     for compatibility with agents such as the tabular Q-learning algorithm.

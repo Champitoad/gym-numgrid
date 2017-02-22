@@ -13,7 +13,7 @@ class DiscreteDirection(Direction):
         self.direction_mapping = {self.direction_space.values[i]: i for i in range(n)}
         self.direction_space = gym.spaces.Discrete(n)
 
-        self.action_space = gym.spaces.Tuple(self.digit_space, self.direction_space)
+        self.action_space = gym.spaces.Tuple((self.digit_space, self.direction_space))
 
     def _action(self, action):
         super()._action(self.direction_mapping[action])
