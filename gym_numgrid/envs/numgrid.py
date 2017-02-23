@@ -10,6 +10,7 @@ from gym_numgrid.envs.rendering import Image
 
 class NumGrid(gym.Env):
     """
+    test
     An environment consisting of a grid of hand-written digits images
     loaded from the MNIST training database.
     It also holds a cursor respresenting the agent's local view on the world.
