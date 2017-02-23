@@ -2,7 +2,6 @@ import numpy as np
 
 import gym
 from gym import spaces
-from gym.utils import seeding
 from gym.envs.classic_control import rendering
 
 from gym_numgrid.utils import mnist_loader
@@ -20,13 +19,43 @@ class NumGrid(gym.Env):
             'configure.required': True
             }
 
-    def __init__(self):
-        self._seed()
-        spaces.prng.np_random.seed()
-        
-        self.steps = 0 # Number of steps done in this episode
-        self.num_steps = 100 # Number of steps to achieve in an episode
+    def __init__(self, size=(5,5), cursor_size=(10,10),\
+            mnist_images_path='train-images-idx3-ubyte.gz',\
+            mnist_labels_path='train-labels-idx1-ubyte.gz'):
+        """
+        size -- dimensions of the grid in number of images as a (width,height) tuple
+        cursor_size -- dimensions of the cursor in pixels as a (width,height) tuple
 
+        mnist_images_path -- path to the MNIST images file, in IDX gzipped format
+        mnist_labels_path -- path to the MNIST labels file, in IDX gzipped format
+        """
+        self.size = np.array(size)
+        self.cursor_size = np.array(cursor_size)
+        self.cursor_pos = np.zeros(2)
+
+        self.images = mnist_loader.load_idx_data(mnist_images_path, size[::-1])
+        self.labels = mnist_loader.load_idx_data(mnist_labels_path, size[::-1])
+
+        H, W, h, w = self.images.shape
+        self.world = self.images.swapaxes(1,2).reshape(H*h, W*w)
+
+        # An action consists of a guess at the digit currently under the cursor,
+        # plus a new cursor position; the agent might not want to try a guess yet,
+        # in which case it should use the value 10 to indicate that the prediction
+        # must be ignored
+
+        self.digit_space = spaces.Discrete(11)
+        world_bounds = np.array(self.world.shape[::-1]) - 1 - self.cursor_size
+        self.position_space = spaces.MultiDiscrete(np.stack([(0,0), world_bounds], 1))
+
+        self.action_space = spaces.Tuple((self.digit_space, self.position_space))
+
+        # An observation is the cursor view on the world, therefore the observation
+        # space is equivalent to the cursor position space (cursor size being fixed)
+
+        self.observation_space = self.position_space
+
+        spaces.prng.np_random.seed() # For correct random reset of the cursor position
         self.viewer = None
 
     def _step(self, action):
@@ -117,53 +146,18 @@ class NumGrid(gym.Env):
             self.viewer.close()
             self.viewer = None
 
-    def _configure(self, size=(10,10), cursor_size=(10,10), \
-            mnist_images_path='train-images-idx3-ubyte.gz', \
-            mnist_labels_path='train-labels-idx1-ubyte.gz', \
-            render_scale=2, draw_grid=False):
+    def _configure(self, num_steps=100, render_scale=2, draw_grid=False):
         """
-        size -- dimensions of the grid in number of images as a (width,height) tuple
-        cursor_size -- dimensions of the cursor in pixels as a (width,height) tuple
-
-        mnist_images_path -- path to the MNIST images file, in IDX gzipped format
-        mnist_labels_path -- path to the MNIST labels file, in IDX gzipped format
+        num_steps -- number of steps to achieve in an episode
 
         render_scale -- scale to apply to the viewer's rendering of the world
         draw_grid -- whether the viewer should draw a grid delimiting digit images
         """
-        self.size = np.array(size)
-        self.cursor_size = np.array(cursor_size)
-        self.cursor_pos = np.zeros(2)
+        self.num_steps = num_steps
+        self.steps = 0 # Number of steps done in the current episode
 
         self.render_scale = render_scale
         self.draw_grid = draw_grid
-
-        self.images = mnist_loader.load_idx_data(mnist_images_path, size[::-1])
-        self.labels = mnist_loader.load_idx_data(mnist_labels_path, size[::-1])
-
-        H, W, h, w = self.images.shape
-        self.world = self.images.swapaxes(1,2).reshape(H*h, W*w)
-
-        # An action consists of a guess at the digit currently under the cursor,
-        # plus a new cursor position; the agent might not want to try a guess yet,
-        # in which case it should use the value 10 to indicate that the prediction
-        # must be ignored
-
-        self.digit_space = spaces.Discrete(11)
-
-        world_bounds = np.array(self.world.shape[::-1]) - 1 - self.cursor_size
-        self.position_space = spaces.MultiDiscrete(np.stack([(0,0), world_bounds], 1))
-
-        self.action_space = spaces.Tuple((self.digit_space, self.position_space))
-
-        # An observation is the cursor view on the world, therefore the observation
-        # space is equivalent to the cursor position space (cursor size being fixed)
-
-        self.observation_space = self.position_space
-
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
 
     @property
     def current_digit(self):

@@ -11,13 +11,12 @@ green = '\033[32m'
 endc = '\033[0m'
 
 numgrid = gym.make('NumGrid-v0')
-numgrid.configure(size=(5,5), render_scale=4, draw_grid=True)
 numgrid = DiscreteDirectionWrapper(numgrid)
 numgrid = DiscreteActionWrapper(DiscreteObservationWrapper(numgrid))
 
 experiment_path = '/tmp/numgrid-direction-random'
 env = Monitor(numgrid, experiment_path, force=True)
-env.configure(size=(5,5), render_scale=4, draw_grid=True)
+env.configure(num_steps=50, render_scale=4, draw_grid=True)
 
 agent = RandomAgent(env.action_space)
 
