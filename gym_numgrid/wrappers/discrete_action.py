@@ -1,8 +1,11 @@
+import numpy as np
+
 import gym
 
 from gym_numgrid.utils.spaces import total_discrete_mapping
+from gym_numgrid.wrappers.numgrid import NumGridWrapper
 
-class DiscreteAction(gym.ActionWrapper):
+class DiscreteActionWrapper(NumGridWrapper, gym.ActionWrapper):
     """
     An action wrapper for NumGrid with a Discrete action space,
     for compatibility with agents such as the tabular Q-learning algorithm.
@@ -19,4 +22,4 @@ class DiscreteAction(gym.ActionWrapper):
         self.action_space = gym.spaces.DiscreteToMultiDiscrete(action_space, action_mapping)
 
     def _action(self, action):
-        return self.action_space[action]
+        return self.action_space(action)
