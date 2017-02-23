@@ -15,7 +15,7 @@ cd gym-numgrid
 pip install -e .
 ```
 
-To get started with the environment, you can run the default test example:
+To get started with the environment, you can run it with one of the agents in `examples/agents`:
 ```bash
-python test.py
+python examples/agents/random_agent.py
 ```

@@ -1,12 +1,12 @@
+import numpy as np
+
 import gym
 from gym import spaces
 from gym.utils import seeding
 from gym.envs.classic_control import rendering
 
-import numpy as np
-import pyglet
-
-from gym_numgrid import mnist_loader
+from gym_numgrid.utils import mnist_loader
+from gym_numgrid.envs.rendering import Image
 
 class NumGrid(gym.Env):
     """
@@ -16,12 +16,17 @@ class NumGrid(gym.Env):
     """
     metadata = {
             'render.modes': ['human', 'rgb_array'],
-            'video.frames_per_second': 30,
+            'video.frames_per_second': 60,
             'configure.required': True
             }
 
     def __init__(self):
         self._seed()
+        spaces.prng.np_random.seed()
+        
+        self.steps = 0 # Number of steps done in this episode
+        self.num_steps = 100 # Number of steps to achieve in an episode
+
         self.viewer = None
 
     def _step(self, action):
@@ -33,19 +38,24 @@ class NumGrid(gym.Env):
         if digit < 10:
             if digit != info['digit']:
                 reward -= 3
+                if not self.position_space.contains(pos):
+                    info['out_of_bounds'] = True
+                else:
+                    self.cursor_pos = np.array(pos)
             else:
                 reward += 3
-                # done = True
+                self.cursor_pos = np.array(self.position_space.sample())
 
-        if not self.position_space.contains(pos):
-            info['out_of_bounds'] = True
-        else:
-            self.cursor_pos = np.array(pos)
-            info['cursor'] = self.cursor
+        info['cursor'] = self.cursor
+
+        self.steps += 1
+        if self.steps >= self.num_steps:
+            done = True
 
         return self.cursor_pos, reward, done, info
 
     def _reset(self):
+        self.steps = 0
         self.cursor_pos = np.array(self.position_space.sample())
         return self.cursor_pos
 
@@ -107,14 +117,13 @@ class NumGrid(gym.Env):
             self.viewer.close()
             self.viewer = None
 
-    def _configure(self, size=(10,10), cursor_size=(10,10), cursor_pos=(0,0), \
+    def _configure(self, size=(10,10), cursor_size=(10,10), \
             mnist_images_path='train-images-idx3-ubyte.gz', \
             mnist_labels_path='train-labels-idx1-ubyte.gz', \
             render_scale=2, draw_grid=False):
         """
         size -- dimensions of the grid in number of images as a (width,height) tuple
         cursor_size -- dimensions of the cursor in pixels as a (width,height) tuple
-        cursor_pos -- (x,y) initial position of the cursor, with top-left origin
 
         mnist_images_path -- path to the MNIST images file, in IDX gzipped format
         mnist_labels_path -- path to the MNIST labels file, in IDX gzipped format
@@ -124,7 +133,7 @@ class NumGrid(gym.Env):
         """
         self.size = np.array(size)
         self.cursor_size = np.array(cursor_size)
-        self.cursor_pos = np.array(cursor_pos)
+        self.cursor_pos = np.zeros(2)
 
         self.render_scale = render_scale
         self.draw_grid = draw_grid
@@ -146,12 +155,6 @@ class NumGrid(gym.Env):
         self.position_space = spaces.MultiDiscrete(np.stack([(0,0), world_bounds], 1))
 
         self.action_space = spaces.Tuple((self.digit_space, self.position_space))
-
-        # A smaller action space for the position consisting of the 4 orthogonal directions;
-        # one such action must be converted into a real action (a position),
-        # typically using the cursor_move method
-
-        self.direction_space = Direction()
 
         # An observation is the cursor view on the world, therefore the observation
         # space is equivalent to the cursor position space (cursor size being fixed)
@@ -186,42 +189,3 @@ class NumGrid(gym.Env):
         Returns the cursor's center position.
         """
         return self.cursor_pos + (self.cursor_size/2).astype(int)
-
-    def cursor_move(self, direction, distance=1):
-        """
-        Returns the cursor position if it were moved
-        in the given direction on the given distance.
-
-        direction -- value in the Direction space
-        distance -- scalar integer value in pixels
-        """
-        return self.cursor_pos + np.array(direction) * distance
-
-class Direction(gym.Space):
-    def __init__(self):
-        self.values = [(-1,0), (1,0), (0,-1), (0,1)]
-
-    def sample(self):
-        spaces.prng.np_random.shuffle(self.values)
-        return self.values[0]
-
-    def contains(self, x):
-        return x in self.values
-
-class Image(rendering.Geom):
-    """
-    Our own implementation of gym.envs.classic_control.rendering.Image 
-    to render an image loaded from an ndarray instead of a file.
-    """
-    def __init__(self, arr):
-        rendering.Geom.__init__(self)
-
-        h, w, channels = arr.shape
-        assert channels == 4, 'Image must be in RGBA format'
-        arr = 255 - arr # Image is rendered in negative for some reason,
-                        # so we get it back to its original state
-        pitch = -w * channels
-        self.img = pyglet.image.ImageData(w, h, 'RGBA', arr.tobytes(), pitch=pitch)
-
-    def render1(self):
-        self.img.blit(0,0)
