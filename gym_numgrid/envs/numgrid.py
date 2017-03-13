@@ -20,12 +20,14 @@ class NumGrid(gym.Env):
             }
 
     def __init__(self, size=(5,5), cursor_size=(10,10),\
+            digits=set(range(10)),\
             mnist_images_path='train-images-idx3-ubyte.gz',\
             mnist_labels_path='train-labels-idx1-ubyte.gz'):
         """
-        size -- dimensions of the grid in number of images as a (width,height) tuple
-        cursor_size -- dimensions of the cursor in pixels as a (width,height) tuple
+        size -- dimensions of the grid in number of images as a (width, height) tuple
+        cursor_size -- dimensions of the cursor in pixels as a (width, height) tuple
 
+        digits -- set of digits we want to load from MNIST
         mnist_images_path -- path to the MNIST images file, in IDX gzipped format
         mnist_labels_path -- path to the MNIST labels file, in IDX gzipped format
         """
@@ -33,8 +35,17 @@ class NumGrid(gym.Env):
         self.cursor_size = np.array(cursor_size)
         self.cursor_pos = np.zeros(2)
 
-        self.images = mnist_loader.load_idx_data(mnist_images_path, size[::-1])
-        self.labels = mnist_loader.load_idx_data(mnist_labels_path, size[::-1])
+        self.labels = mnist_loader.load_idx_data(mnist_labels_path)
+        i = 0
+        labels_i = []
+        while len(labels_i) < np.prod(size):
+            if self.labels[i] in digits:
+                labels_i.append(i)
+            i += 1
+        self.images = mnist_loader.load_idx_data(mnist_images_path, (labels_i[-1] + 1,))
+
+        self.labels = self.labels[labels_i].reshape(size[::-1] + self.labels.shape[1:])
+        self.images = self.images[labels_i].reshape(size[::-1] + self.images.shape[1:])
 
         H, W, h, w = self.images.shape
         self.world = self.images.swapaxes(1,2).reshape(H*h, W*w)
@@ -45,6 +56,7 @@ class NumGrid(gym.Env):
         # must be ignored
 
         self.digit_space = spaces.Discrete(11)
+
         world_bounds = np.array(self.world.shape[::-1]) - 1 - self.cursor_size
         self.position_space = spaces.MultiDiscrete(np.stack([(0,0), world_bounds], 1))
 

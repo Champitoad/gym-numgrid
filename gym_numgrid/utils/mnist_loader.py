@@ -1,6 +1,5 @@
 import gzip
 import numpy as np
-from functools import reduce
 
 def get_idx_metadata(idx_file):
     """
@@ -36,11 +35,11 @@ def load_idx_data(path, outer_shape=None):
     outer_shape = tuple(outer_shape)
     data_shape = metadata[1][1:]
 
-    assert reduce(lambda a,b: a*b, outer_shape) <= data_len, \
+    assert np.prod(outer_shape) <= data_len, \
         'Outer shape size must be smaller than %i' % data_len
 
     shape = outer_shape + data_shape
-    size = reduce(lambda a,b: a*b, shape)
+    size = np.prod(shape)
 
     dtype_len = np.dtype(dtype).itemsize
     data = np.array([int.from_bytes(idx_file.read(dtype_len), byteorder='big')
