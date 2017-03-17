@@ -19,3 +19,5 @@ To get started with the environment, you can run it with one of the agents in `e
 ```bash
 python examples/test.py
 ```
+
+This will work out of the box only if you downloaded the MNIST training data (files `train-images-idx3-ubyte.gz` and `train-labels-idx1-ubyte.gz`) in the directory you launched the script from. You can change the default paths using the environment's `configure` method.
