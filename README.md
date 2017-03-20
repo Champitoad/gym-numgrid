@@ -6,8 +6,6 @@ The environment holds a cursor representing the agent's local view on the world 
 
 The agent's goal is to reach the highest possible speed in accurately guessing the digit it is currently viewing. Right labelling leads to a positive reward, and wrong labelling to a negative one. The agent can of course take some steps to prepare its answer by exploring the image, in which case it can label with a 10 to tell the environment to ignore the answer.
 
-A part of the task's difficulty resides in the agent's ability to keep the cursor focused on the same digit to avoid mixing information from different images, which would be confusing.
-
 # Installation
 
 ```bash
