@@ -12,8 +12,6 @@ class Image(rendering.Geom):
 
         h, w, channels = arr.shape
         assert channels == 4, 'Image must be in RGBA format'
-        arr = 255 - arr # Image is rendered in negative for some reason,
-                        # so we get it back to its original state
         pitch = -w * channels
         self.img = pyglet.image.ImageData(w, h, 'RGBA', arr.tobytes(), pitch=pitch)
 

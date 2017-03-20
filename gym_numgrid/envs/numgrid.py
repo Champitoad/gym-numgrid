@@ -113,9 +113,9 @@ class NumGrid(gym.Env):
             scaling = rendering.Transform(scale=scale)
             self.viewer = rendering.Viewer(*screen_size)
 
-            world = np.array([(x,x,x,x) for x in self.world.flatten()])
+            world = np.array([(x,) * 4 for x in self.world.flatten()])
             world = world.reshape(self.world.shape + (4,)) # RGBA
-            world = Image(world)
+            world = Image(255 - world) # Render in negative
             world.add_attr(scaling)
             self.viewer.add_geom(world)
 
