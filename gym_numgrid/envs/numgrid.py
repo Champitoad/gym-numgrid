@@ -19,7 +19,7 @@ class NumGrid(gym.Env):
             'configure.required': True
             }
 
-    def __init__(self, size=(5,5), cursor_size=(10,10),\
+    def __init__(self, size=(5,5), cursor_size=(10,10), cursor_pos=(0,0),\
             digits=set(range(10)),\
             mnist_images_path='train-images-idx3-ubyte.gz',\
             mnist_labels_path='train-labels-idx1-ubyte.gz'):
@@ -33,7 +33,7 @@ class NumGrid(gym.Env):
         """
         self.size = np.array(size)
         self.cursor_size = np.array(cursor_size)
-        self.cursor_pos = np.zeros(2)
+        self.cursor_pos = np.array(cursor_pos)
 
         self.labels = mnist_loader.load_idx_data(mnist_labels_path)
         i = 0
