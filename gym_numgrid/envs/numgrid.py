@@ -76,13 +76,14 @@ class NumGrid(gym.Env):
         done = False
         info = {'out_of_bounds': False, 'digit': self.current_digit}
 
+        if not self.position_space.contains(pos):
+            info['out_of_bounds'] = True
+        else:
+            self.cursor_pos = np.array(pos)
+
         if digit < 10:
             if digit != info['digit']:
                 reward -= 3
-                if not self.position_space.contains(pos):
-                    info['out_of_bounds'] = True
-                else:
-                    self.cursor_pos = np.array(pos)
             else:
                 reward += 3
                 self.cursor_pos = np.array(self.position_space.sample())
