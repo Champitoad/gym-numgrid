@@ -113,6 +113,7 @@ class NumGrid(gym.Env):
         if self.viewer is None:
             scaling = rendering.Transform(scale=scale)
             self.viewer = rendering.Viewer(*screen_size)
+            self.viewer.window.set_size(*screen_size)
 
             world = np.array([(x,) * 4 for x in self.world.flatten()])
             world = world.reshape(self.world.shape + (4,)) # RGBA
