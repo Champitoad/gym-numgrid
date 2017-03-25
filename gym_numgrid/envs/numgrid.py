@@ -22,7 +22,9 @@ class NumGrid(gym.Env):
     def __init__(self, size=(5,5), cursor_size=(10,10), cursor_pos=(0,0),\
             digits=set(range(10)),\
             mnist_images_path='train-images-idx3-ubyte.gz',\
-            mnist_labels_path='train-labels-idx1-ubyte.gz'):
+            mnist_labels_path='train-labels-idx1-ubyte.gz',\
+            num_steps=100,\
+            render_scale=2, draw_grid=False):
         """
         size -- dimensions of the grid in number of images as a (width, height) tuple
         cursor_size -- dimensions of the cursor in pixels as a (width, height) tuple
@@ -30,6 +32,11 @@ class NumGrid(gym.Env):
         digits -- set of digits we want to load from MNIST
         mnist_images_path -- path to the MNIST images file, in IDX gzipped format
         mnist_labels_path -- path to the MNIST labels file, in IDX gzipped format
+
+        num_steps -- number of steps to achieve in an episode
+
+        render_scale -- scale to apply to the viewer's rendering of the world
+        draw_grid -- whether the viewer should draw a grid delimiting digit images
         """
         self.size = np.array(size)
         self.cursor_size = np.array(cursor_size)
@@ -67,8 +74,14 @@ class NumGrid(gym.Env):
 
         self.observation_space = self.position_space
 
-        spaces.prng.np_random.seed() # For correct random reset of the cursor position
+        self.num_steps = num_steps
+        self.steps = 0 # Number of steps done in the current episode
+
         self.viewer = None
+        self.render_scale = render_scale
+        self.draw_grid = draw_grid
+
+        spaces.prng.np_random.seed() # For correct random reset of the cursor position
 
     def _step(self, action):
         digit, pos = action
@@ -159,19 +172,6 @@ class NumGrid(gym.Env):
         if self.viewer is not None:
             self.viewer.close()
             self.viewer = None
-
-    def _configure(self, num_steps=100, render_scale=2, draw_grid=False):
-        """
-        num_steps -- number of steps to achieve in an episode
-
-        render_scale -- scale to apply to the viewer's rendering of the world
-        draw_grid -- whether the viewer should draw a grid delimiting digit images
-        """
-        self.num_steps = num_steps
-        self.steps = 0 # Number of steps done in the current episode
-
-        self.render_scale = render_scale
-        self.draw_grid = draw_grid
 
     @property
     def current_digit(self):
