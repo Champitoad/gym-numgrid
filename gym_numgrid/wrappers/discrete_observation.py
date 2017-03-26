@@ -11,10 +11,10 @@ class DiscreteObservationWrapper(NumGridWrapper, gym.ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
 
-        pos_mapping = total_discrete_mapping(self.observation_space)
-        self.observation_space = gym.spaces.DiscreteToMultiDiscrete(self.observation_space, pos_mapping)
+        self.pos_mapping = total_discrete_mapping(self.observation_space)
+        self.observation_space = gym.spaces.Discrete(len(self.pos_mapping))
 
     def _observation(self, observation):
-        discrete = list(self.observation_space.mapping.keys())
-        multi_discrete = list(self.observation_space.mapping.values())
+        discrete = list(self.pos_mapping.keys())
+        multi_discrete = list(self.pos_mapping.values())
         return discrete[multi_discrete.index(observation.tolist())]

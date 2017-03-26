@@ -6,8 +6,8 @@ class DiscreteDirectionWrapper(DirectionWrapper):
     """
     An action wrapper for NumGrid with a Discrete direction space.
     """
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, env, distance=1):
+        super().__init__(env, distance)
         
         n = len(self.direction_space.values)
         self.direction_mapping = {i: self.direction_space.values[i] for i in range(n)}

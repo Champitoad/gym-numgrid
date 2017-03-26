@@ -16,7 +16,6 @@ numgrid = DiscreteActionWrapper(DiscreteObservationWrapper(numgrid))
 
 experiment_path = '/tmp/numgrid-direction-random'
 env = Monitor(numgrid, experiment_path, force=True)
-env.configure(num_steps=50, render_scale=4, draw_grid=True)
 
 agent = RandomAgent(env.action_space)
 

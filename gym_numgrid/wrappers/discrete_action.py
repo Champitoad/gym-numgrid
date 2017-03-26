@@ -17,9 +17,9 @@ class DiscreteActionWrapper(NumGridWrapper, gym.ActionWrapper):
         params = np.stack([np.zeros(len(self.action_space.spaces)), bounds], 1)
 
         action_space = gym.spaces.MultiDiscrete(params)
-        action_mapping = total_discrete_mapping(action_space)
+        self.action_mapping = total_discrete_mapping(action_space)
 
-        self.action_space = gym.spaces.DiscreteToMultiDiscrete(action_space, action_mapping)
+        self.action_space = gym.spaces.Discrete(len(self.action_mapping))
 
     def _action(self, action):
-        return self.action_space(action)
+        return self.action_mapping[action]

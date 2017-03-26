@@ -17,7 +17,6 @@ class DirectionWrapper(NumGridWrapper, gym.ActionWrapper):
         self.distance = distance
 
         self.direction_space = spaces.Direction()
-
         self.action_space = gym.spaces.Tuple((self.digit_space, self.direction_space))
 
     def _action(self, action):
