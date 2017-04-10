@@ -12,7 +12,7 @@ endc = '\033[0m'
 
 numgrid = gym.make('NumGrid-v0')
 numgrid = DiscreteDirectionWrapper(numgrid)
-numgrid = DiscreteActionWrapper(DiscreteObservationWrapper(numgrid))
+numgrid = DiscreteActionWrapper(numgrid)
 
 experiment_path = '/tmp/numgrid-direction-random'
 env = Monitor(numgrid, experiment_path, force=True)

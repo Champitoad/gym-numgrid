@@ -69,10 +69,9 @@ class NumGrid(gym.Env):
 
         self.action_space = spaces.Tuple((self.digit_space, self.position_space))
 
-        # An observation is the cursor view on the world, therefore the observation
-        # space is equivalent to the cursor position space (cursor size being fixed)
+        # An observation is the cursor view on the world
 
-        self.observation_space = self.position_space
+        self.observation_space = spaces.Box(0, 255, self.cursor_size[::-1])
 
         self.num_steps = num_steps
         self.steps = 0 # Number of steps done in the current episode
@@ -101,18 +100,16 @@ class NumGrid(gym.Env):
                 reward += 3
                 self.cursor_pos = np.array(self.position_space.sample())
 
-        info['cursor'] = self.cursor
-
         self.steps += 1
         if self.steps >= self.num_steps:
             done = True
 
-        return self.cursor_pos, reward, done, info
+        return self.cursor, reward, done, info
 
     def _reset(self):
         self.steps = 0
         self.cursor_pos = np.array(self.position_space.sample())
-        return self.cursor_pos
+        return self.cursor
 
     def _render(self, mode='human', close=False):
         if close:

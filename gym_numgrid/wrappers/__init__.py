@@ -1,5 +1,4 @@
 from gym_numgrid.wrappers.direction import DirectionWrapper
 from gym_numgrid.wrappers.discrete_direction import DiscreteDirectionWrapper
 from gym_numgrid.wrappers.discrete_position import DiscretePositionWrapper
-from gym_numgrid.wrappers.discrete_observation import DiscreteObservationWrapper
 from gym_numgrid.wrappers.discrete_action import DiscreteActionWrapper
