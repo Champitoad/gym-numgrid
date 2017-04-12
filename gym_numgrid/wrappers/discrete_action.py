@@ -1,5 +1,4 @@
 import numpy as np
-
 import gym
 
 from gym_numgrid.utils.spaces import total_discrete_mapping

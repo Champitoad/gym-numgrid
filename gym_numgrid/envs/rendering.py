@@ -1,5 +1,4 @@
 import pyglet
-
 from gym.envs.classic_control import rendering
 
 class Image(rendering.Geom):
