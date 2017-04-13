@@ -42,16 +42,17 @@ class NumGrid(gym.Env):
         self.cursor_pos = np.array(cursor_pos)
 
         self.labels = mnist_loader.load_idx_data(mnist_labels_path)
+        num_examples = np.prod(size)
         i = 0
         labels_i = []
-        while len(labels_i) < np.prod(size):
+        while len(labels_i) < num_examples:
             if self.labels[i] in digits:
                 labels_i.append(i)
             i += 1
-        self.images = mnist_loader.load_idx_data(mnist_images_path, (labels_i[-1] + 1,))
+        self.images = mnist_loader.load_idx_data(mnist_images_path, pos=labels_i)
 
         self.labels = self.labels[labels_i].reshape(size[::-1] + self.labels.shape[1:])
-        self.images = self.images[labels_i].reshape(size[::-1] + self.images.shape[1:])
+        self.images = self.images.reshape(size[::-1] + self.images.shape[1:])
 
         H, W, h, w = self.images.shape
         self.world = self.images.swapaxes(1,2).reshape(H*h, W*w)

@@ -20,29 +20,59 @@ def get_idx_metadata(idx_file):
 
     return (dtype, shape)
 
-def load_idx_data(path, outer_shape=None):
+def load_idx_data(path, outer_shape=None, pos=None):
     """
     Returns an ndarray of data loaded from an IDX gzipped file,
     with a shape of outer_shape + data_shape.
+
+    It is also possible to specify with pos the indices of the examples to retrieve.
+    There are 4 different usecases, depending on the args specification:
+
+    outer_shape == None, pos == None -- Load the entire dataset with outer_shape = (num_examples,)
+    outer_shape != None, pos == None -- Load the first n examples, with n the size of outer_shape
+    outer_shape == None, pos != None -- Load indices specified in pos with outer_shape = (len(pos),)
+    outer_shape != None, pos != None -- Load indices specified in pos with specified outer_shape
     """
     idx_file = gzip.open(path)
 
     metadata = get_idx_metadata(idx_file)
     dtype = metadata[0]
     data_len = metadata[1][0]
-    if outer_shape == None:
-        outer_shape = (data_len,)
-    outer_shape = tuple(outer_shape)
     data_shape = metadata[1][1:]
+    data_size = int(np.prod(data_shape))
 
-    assert np.prod(outer_shape) <= data_len, \
-        'Outer shape size must be smaller than %i' % data_len
-
-    shape = outer_shape + data_shape
-    size = np.prod(shape)
+    if pos is not None:
+        assert len(pos) <= data_len, \
+            'Number of indices must be smaller than %i' % data_len
+        assert sorted(pos)[-1] <= data_len, \
+            'Indices must be smaller than %i' % data_len
+        
+    if outer_shape is None:
+        if pos is None:
+            outer_shape = (data_len,)
+            pos = np.arange(data_len)
+        else:
+            outer_shape = (len(pos),)
+    else:
+        outer_size = np.prod(outer_shape)
+        assert outer_size <= data_len, \
+            'Outer shape size must be smaller than %i' % data_len
+        if pos is None:
+            pos = np.arange(outer_size)
+        else:
+            assert outer_size == len(pos), \
+                'Outer shape size must be equal to the number of indices'
 
     dtype_len = np.dtype(dtype).itemsize
-    data = np.array([int.from_bytes(idx_file.read(dtype_len), byteorder='big')
-                    for i in range(size)], dtype)
-    
-    return data.reshape(shape)
+    data = []
+    for i in range(len(pos) - 1):
+        data += [int.from_bytes(idx_file.read(dtype_len), byteorder='big')
+                for j in range(data_size)]
+        dist = (pos[i+1] - pos[i] + 1) * (dtype_len * data_size)
+        idx_file.seek(dist, 1)
+    data += [int.from_bytes(idx_file.read(dtype_len), byteorder='big')
+            for j in range(data_size)]
+
+    idx_file.close()
+
+    return np.array(data, dtype).reshape(outer_shape + data_shape)
