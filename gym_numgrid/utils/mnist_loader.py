@@ -65,13 +65,13 @@ def load_idx_data(path, outer_shape=None, pos=None):
 
     dtype_len = np.dtype(dtype).itemsize
     data = []
-    for i in range(len(pos) - 1):
+    for i in range(len(pos)):
+        next_pos = pos[i]
+        cur_pos = 0 if i == 0 else pos[i-1] + 1
+        dist = (next_pos - cur_pos) * (dtype_len * data_size)
+        idx_file.seek(dist, 1)
         data += [int.from_bytes(idx_file.read(dtype_len), byteorder='big')
                 for j in range(data_size)]
-        dist = (pos[i+1] - pos[i] + 1) * (dtype_len * data_size)
-        idx_file.seek(dist, 1)
-    data += [int.from_bytes(idx_file.read(dtype_len), byteorder='big')
-            for j in range(data_size)]
 
     idx_file.close()
 
