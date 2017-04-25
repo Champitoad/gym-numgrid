@@ -15,7 +15,7 @@ pip install -e .
 
 To get started with the environment, you can run it with one of the agents in `examples/agents`. An example test loop is provided in `examples/test.py`:
 ```bash
-python examples/test.py
+python -m examples.test
 ```
 
-This will work out of the box only if you downloaded the MNIST training data (files `train-images-idx3-ubyte.gz` and `train-labels-idx1-ubyte.gz`) in the directory you launched the script from. You can change the default paths using the environment's `configure` method.
+This will work out of the box only if you downloaded the MNIST training data (files `train-images-idx3-ubyte.gz` and `train-labels-idx1-ubyte.gz`) in the directory you launched the script from. You can specify different paths in the environment's constructor parameters.
