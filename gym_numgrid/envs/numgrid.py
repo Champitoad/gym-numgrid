@@ -23,7 +23,7 @@ class NumGrid(gym.Env):
             mnist_images_path='train-images-idx3-ubyte.gz',\
             mnist_labels_path='train-labels-idx1-ubyte.gz',\
             num_steps=100,\
-            render_scale=2, draw_grid=False):
+            render_scale=2, draw_grid=False, window_pos=None):
         """
         size -- dimensions of the grid in number of images as a (width, height) tuple
         cursor_size -- dimensions of the cursor in pixels as a (width, height) tuple
@@ -36,6 +36,7 @@ class NumGrid(gym.Env):
 
         render_scale -- scale to apply to the viewer's rendering of the world
         draw_grid -- whether the viewer should draw a grid delimiting digit images
+        window_pos -- position of the viewer's window, defaults to the operating system default
         """
         self.size = np.array(size)
         self.cursor_size = np.array(cursor_size)
@@ -79,6 +80,7 @@ class NumGrid(gym.Env):
         self.viewer = None
         self.render_scale = render_scale
         self.draw_grid = draw_grid
+        self.window_pos = window_pos
 
         spaces.prng.np_random.seed() # For correct random reset of the cursor position
 
@@ -124,6 +126,8 @@ class NumGrid(gym.Env):
             scaling = rendering.Transform(scale=scale)
             self.viewer = rendering.Viewer(*screen_size)
             self.viewer.window.set_size(*screen_size)
+            if self.window_pos is not None:
+                self.viewer.window.set_location(*self.window_pos)
 
             world = np.array([(x,) * 4 for x in self.world.flatten()])
             world = world.reshape(self.world.shape + (4,)) # RGBA
